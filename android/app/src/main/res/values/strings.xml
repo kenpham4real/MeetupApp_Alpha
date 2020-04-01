@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">MeetUp2</string>
+    <string name="facebook_app_id">155823689011175</string>
+    <string name="fb_login_protocol_scheme">fb155823689011175</string>
+</resources>
