@@ -11,11 +11,14 @@ import { default as customMapping } from './custom-mapping.json';
 
 import placeReducer from './store/reducers/place/place'
 import tripReducer from './store/reducers/trip/trip'
+import profileReducer from './store/reducers/profile/profile';
+
 import MainNavigator from './src/navigation/core/MainNavigator';
 
 const rootReducer = combineReducers({
   places: placeReducer,
-  trips: tripReducer
+  trips: tripReducer,
+  profile: profileReducer
 });
 
 const store = createStore(rootReducer, applyMiddleware(ReduxThunk));

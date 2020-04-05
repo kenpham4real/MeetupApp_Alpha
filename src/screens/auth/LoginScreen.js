@@ -8,22 +8,31 @@ import {
     Text,
     TouchableOpacity
 } from 'react-native';
+
+// Components
 import mainStyle from '../../components/UI/MainStyle';
 import mainButton from '../../components/UI/MainButton';
 
+// Redux store
+import { addProfile } from '../../../store/actions/profile/profile';
+
+// NPM Package
+import {useDispatch} from 'react-redux';
+
 import Icon from 'react-native-vector-icons/FontAwesome5'
-import {
-    Layout
-} from '@ui-kitten/components';
-import { GoogleSignin, GoogleSigninButton, statusCodes } from '@react-native-community/google-signin';
+import { GoogleSignin, statusCodes } from '@react-native-community/google-signin';
 import { firebase } from '@react-native-firebase/auth';
-import { LoginButton, LoginManager, AccessToken } from 'react-native-fbsdk';
+import { LoginManager, AccessToken } from 'react-native-fbsdk';
 import Colors from '../../constants/Colors';
 
 const LoginScreen = (props) => {
 
     const [userInfo, setUserInfo] = useState(null);
     const [isLogIn, setIsLogIn] = useState(false);
+    const [userAvatar, setUserAvatar] = useState(null);
+    const [userEmail, setUserEmail] = useState(null);
+
+    const dispatch = useDispatch();
     
     // Facebook log in
     const  facebookLogin = async () => {
@@ -63,18 +72,24 @@ const LoginScreen = (props) => {
             accountName: '',
             
         });
-        try {
-            
+        try {            
             await GoogleSignin.hasPlayServices();
             const user = await GoogleSignin.signIn();
-            setUserInfo(user);
+            console.log(user.user.name);
+
+            setUserInfo(user.user.name);
+            setUserAvatar(user.user.photo);
+            setUserEmail(user.user.email);
+
             setIsLogIn(true);
 
             const credential = firebase.auth.GoogleAuthProvider.credential(user.idToken, user.accessToken);
             const firebaseCredential = await firebase.auth().signInWithCredential(credential);
             if(user){
+                console.log('Time to dispatch')
+                dispatch(addProfile(user.user.name, user.user.photo,user.user.email));
                 props.navigation.navigate('AppNavigator',{
-                    screen: 'Welcome'
+                    screen: 'ProfileScreen'
                 });
             }
         } catch (error) {
