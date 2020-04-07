@@ -47,6 +47,7 @@ const TripsListDetailScreen = (props) => {
     //   }));
 
     const onFinish = () => {
+        console.log('add trip');
         dispatch(addTrip(final_eventName, final_startDate, final_endDate, places))
         props.navigation.navigate('TripsListScreen');
     }

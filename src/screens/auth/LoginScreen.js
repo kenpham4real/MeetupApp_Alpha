@@ -24,6 +24,7 @@ import { GoogleSignin, statusCodes } from '@react-native-community/google-signin
 import { firebase } from '@react-native-firebase/auth';
 import { LoginManager, AccessToken } from 'react-native-fbsdk';
 import Colors from '../../constants/Colors';
+import { addUser } from '../../../store/actions/auth/auth';
 
 const LoginScreen = (props) => {
 
@@ -76,7 +77,7 @@ const LoginScreen = (props) => {
             await GoogleSignin.hasPlayServices();
             const user = await GoogleSignin.signIn();
             console.log(user.user.name);
-
+            console.log(user.idToken);
             setUserInfo(user.user.name);
             setUserAvatar(user.user.photo);
             setUserEmail(user.user.email);
@@ -85,13 +86,31 @@ const LoginScreen = (props) => {
 
             const credential = firebase.auth.GoogleAuthProvider.credential(user.idToken, user.accessToken);
             const firebaseCredential = await firebase.auth().signInWithCredential(credential);
+            const idToken = await firebaseCredential.user.getIdToken(true)
             if(user){
-                console.log('Time to dispatch')
-                dispatch(addProfile(user.user.name, user.user.photo,user.user.email));
-                props.navigation.navigate('AppNavigator',{
-                    screen: 'ProfileScreen'
-                });
+                console.log('Firebase credential', firebaseCredential)
+                dispatch(addUser(
+                    idToken,
+                    firebaseCredential.user.uid
+                ));
+
+                dispatch(addProfile(
+                    firebaseCredential.user.displayName,
+                    firebaseCredential.user.photoURL,
+                    firebaseCredential.user.email
+                ));
+                firebase.auth().onAuthStateChanged((user) => {
+                    if(user){
+                        props.navigation.navigate('AppNavigator',{
+                            screen: 'ProfileScreen'
+                        });
+                    }else{
+                        throw new Error('Something went wrong, please try to login again!')
+                    }
+                })
+                
             }
+            
         } catch (error) {
             if(error.code === statusCodes.SIGN_IN_CANCELLED){
                 // User has cancelled the sign in flow

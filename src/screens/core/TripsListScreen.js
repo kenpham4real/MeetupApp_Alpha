@@ -1,26 +1,24 @@
-import React from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
     View,
     Text,
     Button,
     FlatList,
     StyleSheet,
-    Animated,
-    Image,
     Dimensions,
-    TouchableOpacity
+    TouchableOpacity,
+    ActivityIndicator
 } from 'react-native';
 
 import { useSelector, useDispatch } from 'react-redux';
 import {enableScreens} from 'react-native-screens';
 
 import TripItem from '../../components/TripItem';
-import PlaceItem from '../../components/PlaceItem';
 import { Layout } from '@ui-kitten/components';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import CardUI from '../../components/UI/Card';
 import Colors from '../../constants/Colors'
 import { unLoadPlace } from '../../../store/actions/place/place';
+import * as tripActions from '../../../store/actions/trip/trip';
 
 enableScreens();
 
@@ -28,11 +26,71 @@ const {width}=Dimensions.get('window');
 
 const TripsListScreen = props => {
 
-    const trips = useSelector(state => state.trips.trips);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const [error, setError] = useState();
+
+    const trips = useSelector(state => state.trips.availableTrips);
     const dispatch = useDispatch();
 
+    const loadTrips = useCallback(async() => {
+        setError(null);
+        setIsRefreshing(true);
+        try {
+            dispatch(tripActions.fetchTrip());
+        } catch (error) {
+            console.log(error);
+            setError(error.message);
+        }
+        setIsRefreshing(false);
+    },[dispatch, setIsRefreshing, setError]);
+
+    useEffect(() => {
+        const willFocus = props.navigation.addListener(
+            'willFocus',
+            loadTrips
+        );
+        return () => {willFocus.remove();}
+    },[loadTrips]);
+
+    useEffect(() => {
+        setIsLoading(true);
+        loadTrips().then(
+            setIsLoading(false),
+        );
+    }, [dispatch, loadTrips])
+
+    if(isLoading){
+        return(
+            <View>
+                <ActivityIndicator size='large' color={Colors.primary} />
+            </View>
+        )
+    }
+
+    if(!isLoading && trips.length === 0){
+        return(
+            <View style={styles.container}>
+                <Text>No trips created. Let make some!</Text>
+            </View>
+        )
+    }
+
+    if (error) {
+        return (
+          <View style={[styles.container, {justifyContent: 'center', alignItems: 'center'}]}>
+            <Text>An error occurred!</Text>
+            <Button
+              title="Try again"
+              onPress={loadTrips}
+              color={Colors.primary}
+            />
+          </View>
+        );
+      }
+
     return(
-        <Layout style={styles.container}>
+        <Layout style={[styles.container]}>
             <Layout style={styles.header}>
                 <Layout style={styles.titleContainer}>
                     <Text style={styles.title}>Let's pack for your trip</Text>
@@ -43,6 +101,8 @@ const TripsListScreen = props => {
             </Layout>
             <View style={styles.list}>
                 <FlatList
+                    onRefresh={loadTrips}
+                    refreshing={isRefreshing}
                     horizontal={true}
                     data={trips.reverse()}
                     keyExtractor={item => item.id}
@@ -83,7 +143,6 @@ const TripsListScreen = props => {
 const styles = StyleSheet.create({
     container:{
         flex: 1,
-
     },
     header:{
         // borderColor: 'black', borderWidth: 1,

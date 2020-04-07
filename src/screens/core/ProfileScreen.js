@@ -19,7 +19,7 @@ const ProfileScreen = (props) => {
             <Text>Avatar:</Text>
             <Image style={{height: 100, width: 100}} source={{uri: `${profile[0].avatar}`}} />
             <Text>Email: {profile[0].email}</Text>
-            <Button title='Logging' onPress={() => console.log(profile)} />
+            <Button title='Logging' onPress={() => props.navigation.navigate('Welcome')} />
         </Layout>
     );
 };
