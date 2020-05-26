@@ -1,11 +1,13 @@
+'use strict'
+
 import React, { useEffect, useState, useCallback } from 'react';
 import {
     View,
     ImageBackground,
     StyleSheet,
     Alert,
-    Button,
     Text,
+    Button,
     TouchableOpacity
 } from 'react-native';
 
@@ -23,8 +25,11 @@ import Icon from 'react-native-vector-icons/FontAwesome5'
 import { GoogleSignin, statusCodes } from '@react-native-community/google-signin';
 import { firebase } from '@react-native-firebase/auth';
 import { LoginManager, AccessToken } from 'react-native-fbsdk';
+<<<<<<< HEAD
 import Colors from '../../constants/Colors';
 import { addUser } from '../../../store/actions/auth/auth';
+=======
+>>>>>>> 7261981... Updating post interaction functionality
 
 const LoginScreen = (props) => {
 
@@ -32,7 +37,6 @@ const LoginScreen = (props) => {
     const [isLogIn, setIsLogIn] = useState(false);
     const [userAvatar, setUserAvatar] = useState(null);
     const [userEmail, setUserEmail] = useState(null);
-
     const dispatch = useDispatch();
     
     // Facebook log in
@@ -40,6 +44,7 @@ const LoginScreen = (props) => {
         try {
             const result = await LoginManager.logInWithPermissions(['public_profile', 'email']).then(
                 (res) => {
+<<<<<<< HEAD
                     if(res.isCancelled){
                         console.log('Something went wrong, please try again');
                     }else{
@@ -51,6 +56,48 @@ const LoginScreen = (props) => {
                               setIsLogIn(true);
                               setUserInfo(data.userID);
                               props.navigation.navigate('AppNavigator', {screen: 'Welcome'})
+=======
+                    // console.log(res);
+                    if(res.isCancelled){
+                        // console.log('Res.iscancelled');
+                    }else{
+                        AccessToken.getCurrentAccessToken().then(
+                            async (data) => {
+                                // console.log('Data access token.toString',data.accessToken.toString())
+                                const cred = firebase.auth.FacebookAuthProvider.credential(data.accessToken);
+                                const firebaseCred = await firebase.auth().signInWithCredential(cred).then(async (firebaseCred) => {
+                                    const idToken = await firebaseCred.user.getIdToken(true);
+                                    setIsLogIn(true);
+                                    setUserInfo(data.userID);
+                                
+                                    dispatch(addUser(
+                                        idToken,
+                                        firebaseCred.user.uid
+                                    ));
+                    
+                                    dispatch(addProfile(
+                                        firebaseCred.user.displayName,
+                                        firebaseCred.user.photoURL,
+                                        firebaseCred.user.email
+                                    ));
+                                    firebase.auth().onAuthStateChanged((user) => {
+                                        if(user){
+                                            props.navigation.navigate('AppNavigator',{
+                                                screen: 'ProfileScreen'
+                                            });
+                                        }else{
+                                            throw new Error('Something went wrong, please try to login again!')
+                                        }
+                                    })
+                                }).catch((err) => {
+                                    let error = err;
+                                    // alert(error);
+                                    if(error == 'Error: [auth/account-exists-with-different-credential] An account already exists with the same email address but different sign-in credentials. Sign in using a provider associated with this email address.'){
+                                        alert('An account with the same email has logged in. Please try another account');
+                                    }
+                                })
+                                
+>>>>>>> 7261981... Updating post interaction functionality
                             }
                             
                           )
@@ -76,8 +123,14 @@ const LoginScreen = (props) => {
         try {            
             await GoogleSignin.hasPlayServices();
             const user = await GoogleSignin.signIn();
+<<<<<<< HEAD
             console.log(user.user.name);
             console.log(user.idToken);
+=======
+            // console.log(user.user.name);
+            // console.log(user.idToken);
+
+>>>>>>> 7261981... Updating post interaction functionality
             setUserInfo(user.user.name);
             setUserAvatar(user.user.photo);
             setUserEmail(user.user.email);
@@ -88,7 +141,12 @@ const LoginScreen = (props) => {
             const firebaseCredential = await firebase.auth().signInWithCredential(credential);
             const idToken = await firebaseCredential.user.getIdToken(true)
             if(user){
+<<<<<<< HEAD
                 console.log('Firebase credential', firebaseCredential)
+=======
+                // console.log('Firebase credential', firebaseCredential);
+
+>>>>>>> 7261981... Updating post interaction functionality
                 dispatch(addUser(
                     idToken,
                     firebaseCredential.user.uid
@@ -147,7 +205,6 @@ const LoginScreen = (props) => {
             }
         }
     }
-
     return(
         <ImageBackground source={require('../../../assets/images/water.jpg')} style={styles.background}>
             <View style={styles.overlay}>

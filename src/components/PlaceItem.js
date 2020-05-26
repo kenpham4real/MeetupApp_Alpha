@@ -1,3 +1,5 @@
+'use strict'
+
 import React from 'react';
 import { View, 
   Text, 
@@ -32,7 +34,7 @@ const styles = StyleSheet.create({
     elevation: 8,
     shadowRadius: 1,
     shadowOpacity: 1,
-    borderRadius: 10,
+    borderRadius: 5,
     paddingVertical: 10,
     marginVertical: 15,
     paddingHorizontal: 30,
@@ -40,22 +42,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row'
   },
   placeItem: {
-    // borderBottomColor: '#ccc',
-    // borderBottomWidth: 1,
-    // paddingVertical: 15,
-    // paddingHorizontal: 30,
     flex: 1,
     marginVertical: 3,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    // borderWidth: 1,
-    // borderColor: 'black',
-    // shadowColor: 'black',
-    // elevation: 7,
-    // shadowRadius: 1,
-    // shadowOpacity: 1,
-    // borderRadius: 10,
   },
   image: {
     width: 70,

@@ -1,4 +1,10 @@
+<<<<<<< HEAD
 import React, { useState } from 'react'
+=======
+'use strict'
+
+import React, { useState, useEffect, useCallback, useRef } from 'react'
+>>>>>>> 7261981... Updating post interaction functionality
 import {
   View,
 
@@ -39,8 +45,14 @@ const TripDescription = (props) => {
   const [chosenMode, setChosenMode] = useState(null);  // chosenMode: true ? startDay : endDay
 
   const [chosenStartDate, setChosenStartDate] = useState('');
+  const [chosenStartDate_unix, setChosenStartDate_unix] = useState(null);
   const [chosenEndDate, setChosenEndDate] = useState('');
+  const [chosenEndDate_unix, setChosenEndDate_unix] = useState(null);
   const [eventName, setEventName] = useState('');
+<<<<<<< HEAD
+=======
+  const [chosenTrip, setChosenTrip] = useState([]);
+>>>>>>> 7261981... Updating post interaction functionality
 
   const showMode = (currentMode) => {
     setDatePickerVisibility(true);
@@ -55,8 +67,12 @@ const TripDescription = (props) => {
   };
 
   const handleConfirm = (day) => { 
+    // console.log('day', day);
+    // console.log('day formatted', parseInt((new Date(moment(day).format()).getTime())/60000) );
+    console.log('New confirm');
     hideDatePicker();
     if(chosenMode){
+<<<<<<< HEAD
       setChosenStartDate(moment(day).format("MMMM Do YYYY, h:mm:ss a"))  
     }else{
       setChosenEndDate(moment(day).format("MMMM Do YYYY, h:mm:ss a"))
@@ -66,6 +82,66 @@ const TripDescription = (props) => {
   const onEventNameHandler = (name) => {
     setEventName(name)
   };
+=======
+      setChosenStartDate(moment(day).format('MMMM Do YYYY, h:mm:ss a'));
+      setChosenStartDate_unix(parseInt((new Date(moment(day).format()).getTime())/60000));
+      console.log('chosenStartDate', chosenStartDate);
+      console.log('choesnStartDate_unix', chosenStartDate_unix);
+    }else{
+      setChosenEndDate(moment(day).format('MMMM Do YYYY, h:mm:ss a'));
+      setChosenEndDate_unix(parseInt((new Date(moment(day).format()).getTime())/60000));
+      console.log('chosenEndDate', chosenEndDate);
+      console.log('chosenEndDate_unix', chosenEndDate_unix);
+    }
+    
+  };
+
+  useEffect(() => {
+    if(!chosenMode) checkValidDate(chosenStartDate_unix, chosenEndDate_unix)
+  }, [chosenEndDate_unix])
+
+  const checkValidDate = (start, end) => {
+    console.log('Checking')
+    console.log('chosenEndDate_unix', chosenEndDate_unix);
+    console.log('chosenStartDate_unix', chosenStartDate_unix);
+    if(start && end){
+      ((end - start) >= 5) 
+      ? (console.log('VALID')) 
+      : (alert('Please travel aleast 5 minutes, life is worth explored!'), setChosenEndDate(''))
+    }
+  }
+
+  const onEventNameHandler = (name) => {
+    setEventName(name)
+  };
+  const places = useSelector(state => state.places.places);
+  const trips = useSelector(state => state.trips.availableTrips);
+  const {tripId} = props.route.params; 
+
+  useEffect(() => {
+    // Check if params: doEditPlace == true => editTrip
+    
+    const unsubscribe = props.navigation.addListener('focus', () => {
+      if(props.route.params?.doEditTrip){
+        let chosenTrip;
+        for(const key in trips){
+          if(trips[key].id === tripId){
+            chosenTrip = trips[key]
+          }
+        }
+        // console.log('Trips here', trips);
+        // console.log('Chosen trip here', chosenTrip);
+        setEventName(chosenTrip.name);
+        setChosenStartDate(chosenTrip.startDate);
+        setChosenEndDate(chosenTrip.endDate);
+      }else{
+        setEventName('');
+        setChosenStartDate('');
+        setChosenEndDate('');
+        console.log('doEditTrip is false in useEffect');
+      }
+    });
+>>>>>>> 7261981... Updating post interaction functionality
 
 
   return (
@@ -83,13 +159,15 @@ const TripDescription = (props) => {
             />
           </Layout>
           <Layout style={{alignItems: 'center', width: 50}}>
+<<<<<<< HEAD
             <TouchableOpacity style={{flex: 1, justifyContent: 'center'}} onPress={()=> Keyboard.dismiss()}>
+=======
+            <TouchableOpacity style={{flex: 1, justifyContent: 'center'}} onPress={()=> {Keyboard.dismiss(); console.log('chosenStartDate', chosenStartDate)}}>
+>>>>>>> 7261981... Updating post interaction functionality
               <Icon name="done" size={36} color={Colors.third}/>
             </TouchableOpacity>
           </Layout>
         </Layout>
-
-        {/* <Layout style={styles.dateStyle}> */}
 
             <Layout style={[styles.dateStyleBox, styles.input]}>
               <Layout style={{flex: 2, alignItems:'center'}}><Text style={styles.dateDisplayed}>{chosenStartDate}</Text></Layout>
@@ -118,7 +196,6 @@ const TripDescription = (props) => {
               </Layout>
             </Layout>  
 
-            {/* <Layout style={[styles.dateStyleBox, styles.input]}> */}
                 <TouchableOpacity style={[styles.button, styles.input]} onPress={() => {
                     props.navigation.navigate('TripsListDetailScreen', {
                       final_eventName: eventName,
@@ -129,19 +206,24 @@ const TripDescription = (props) => {
                   }
                 }>
                   <Text style={{fontFamily: 'Roboto-Regular', fontSize: 20}}>Finish</Text>  
+<<<<<<< HEAD
                 </TouchableOpacity>  
             {/* </Layout> */}
+=======
+                </TouchableOpacity>
+>>>>>>> 7261981... Updating post interaction functionality
 
             {isDatePickerVisible && (
               <DateTimePickerModal
                 isVisible={isDatePickerVisible}
                 mode={mode}
-                onConfirm={handleConfirm}
+                onConfirm={(day)  => {
+                  handleConfirm(day)
+                }}
                 onCancel={hideDatePicker}
-            />
+              />
             )}
         
-        {/* </Layout> */}
       </Layout>
     </Layout>
   );
@@ -251,6 +333,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.secondary
   },
 })
+<<<<<<< HEAD
 
 TripDescription.navigationOptions = (navData) => {
   return{
@@ -274,3 +357,5 @@ TripDescription.navigationOptions = (navData) => {
   )
   }
 }
+=======
+>>>>>>> 7261981... Updating post interaction functionality

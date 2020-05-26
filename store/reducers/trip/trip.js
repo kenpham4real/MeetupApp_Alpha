@@ -1,10 +1,18 @@
+<<<<<<< HEAD
 import { ADD_TRIP, SET_TRIP } from '../../actions/trip/trip';
 import { Trip } from '../../../src/models/trip';
+=======
+// 'use strict'
+
+import { ADD_TRIP, SET_TRIP, UPDATE_TRIP, SHARE_TRIP } from '../../actions/trip/trip';
+import { Trip, TripShare } from '../../../src/models/trip';
+>>>>>>> 7261981... Updating post interaction functionality
 
 const initialState = {
     trips: [],
     availableTrips:[]
 }
+
 
 export default tripReducer = (state = initialState, action) => {
     switch(action.type){

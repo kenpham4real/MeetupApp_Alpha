@@ -1,3 +1,5 @@
+'use strict'
+
 export const ADD_PLACE = 'ADD_PLACE';
 export const UNLOAD_PLACE ='UNLOAD_PLACE';
 

@@ -1,3 +1,5 @@
+'use strict'
+
 import React, {useEffect, useState} from 'react';
 import {
     View,
@@ -21,6 +23,11 @@ const LoadingScreen = (props) => {
     
     const [logoPosition] = useState(new Animated.Value(0));
     const [textPosition] = useState(new Animated.Value(0));
+<<<<<<< HEAD
+=======
+    const authState = useSelector(state => state.auth)
+    const dispatch = useDispatch();
+>>>>>>> 7261981... Updating post interaction functionality
 
     useEffect(() => {
         Animated.timing(logoPosition,{
@@ -29,6 +36,7 @@ const LoadingScreen = (props) => {
         }).start();
         Animated.timing(textPosition, {
             toValue: 1,
+<<<<<<< HEAD
             duration: 4000
         }).start();
         setTimeout(() => {
@@ -36,6 +44,40 @@ const LoadingScreen = (props) => {
         },7000);
         
     },[]);
+=======
+            duration: 8000
+        }).start(tryLogin);
+        
+    },[dispatch]);
+    
+    const refreshToken = async () => {
+        const {uid, photoURL, email, displayName} = firebase.auth().currentUser;
+        await firebase.auth().currentUser.getIdToken(true).then((idToken) => {
+            dispatch(authActions.addUser(idToken, uid));
+            dispatch(addProfile(displayName,photoURL,email));
+        });
+        
+    }
+    const tryLogin = async () => {
+        
+        const userData = await AsyncStorage.getItem('userData');
+        
+        if(!userData){
+            props.navigation.navigate('AuthNavigator');
+            return;
+        }
+
+        const transformedData = JSON.parse(userData);
+        const { token, uid } = transformedData;
+        if(!token || !uid){
+            props.navigation.navigate('AuthNavigator');
+            return;
+        }
+        
+        await refreshToken();
+        props.navigation.navigate('AppNavigator');
+    };
+>>>>>>> 7261981... Updating post interaction functionality
 
     return(
         <ImageBackground source={require('../../assets/images/sitting.jpg')} style={styles.container}>

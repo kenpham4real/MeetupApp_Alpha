@@ -1,8 +1,14 @@
-import { ADD_PROFILE } from '../../actions/profile/profile';
+// 'use strict'
+
+import { ADD_PROFILE,REMOVE_PROFILE_FOR_LOG_OUT } from '../../actions/profile/profile';
 import {Profile} from '../../../src/models/profile/profile';
 
 const initialState = {
-    userProfile: []
+    userProfile: {
+        userName: null,
+        userAvatar: null,
+        userEmail: null
+    }
 };
 
 export default (state = initialState, action) => {
@@ -16,8 +22,14 @@ export default (state = initialState, action) => {
 
             return{
                 ...state,
-                userProfile: state.userProfile.concat(newProfile)
+                userProfile:{
+                    userName: newProfile.name,
+                    userAvatar: newProfile.avatar,
+                    userEmail: newProfile.email
+                }
             }
+        case REMOVE_PROFILE_FOR_LOG_OUT: 
+            return initialState
         default: return state;
     }
 }

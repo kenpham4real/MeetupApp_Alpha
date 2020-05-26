@@ -1,3 +1,5 @@
+'use strict'
+
 import {StyleSheet} from 'react-native';
 
 const mainButton = StyleSheet.create({

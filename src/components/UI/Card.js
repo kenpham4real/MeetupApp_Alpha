@@ -1,3 +1,5 @@
+'use strict'
+
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 
@@ -12,8 +14,9 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 8,
     elevation: 7,
-    borderRadius: 10,
+    borderRadius: 2,
     backgroundColor: 'white',
+    marginHorizontal: 5
   }
 });
 

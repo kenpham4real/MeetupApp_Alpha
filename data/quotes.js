@@ -1,3 +1,5 @@
+'use strict'
+
 export const quotes = [
     " “THE WORLD IS A BOOK AND THOSE WHO DO NOT TRAVEL READ ONLY A PAGE.” \n~ SAINT AUGUSTINE",
     " “NOT ALL THOSE WHO WANDER ARE LOST” \n~ J.R.R. TOLKIEN",

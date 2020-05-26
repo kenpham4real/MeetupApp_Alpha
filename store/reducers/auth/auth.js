@@ -1,4 +1,10 @@
+<<<<<<< HEAD
 import { LOGIN } from '../../actions/auth/auth';
+=======
+// 'use strict'
+
+import { LOGOUT, AUTHENTICATE } from '../../actions/auth/auth';
+>>>>>>> 7261981... Updating post interaction functionality
 
 const initialState = {
     user:{

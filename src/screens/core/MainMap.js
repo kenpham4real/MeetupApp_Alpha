@@ -1,3 +1,5 @@
+'use strict'
+
 import React from 'react';
 import { 
     TouchableWithoutFeedback,
@@ -30,8 +32,8 @@ import { bindActionCreators } from 'redux';
 
 
 const INCREMENT = 1;
-const HEIGHT = Dimensions.get('window').height;
-const WIDTH = Dimensions.get('window').width;
+const HEIGHT = Dimensions.get('screen').height;
+const WIDTH = Dimensions.get('screen').width;
 
 const initialState = {
     hasMapPermission: false,
@@ -119,6 +121,7 @@ class MainMap extends React.Component{
         )
         : null;
     };
+    // shouldComponentUpdate()
     componentWillUnmount(){
         Geolocation.clearWatch(this.watch_location_id);
         this._unsubscribe();
@@ -191,7 +194,6 @@ class MainMap extends React.Component{
             this.setState({
                 destination: placeId,
                 destinationCoords: [...this.state.destinationCoords, latLng],
-                // wayPoints: [...wayPoints, latLng],
                 markers: [...markers, latLng],
             });
             this.map.current.fitToCoordinates(latLng, {
@@ -307,6 +309,7 @@ class MainMap extends React.Component{
         this.getPlaceDetails();
     };
 
+<<<<<<< HEAD
     // Delete a search bar
     onDeleteSearch(inputId){
         // const items = this.state.numOfInput.filter(item => item !== inputId);
@@ -318,6 +321,17 @@ class MainMap extends React.Component{
             numOfInput: numOfInput_Output,
             destinationName: desName_Output,
             destinationAddress: desAddress_Output
+=======
+    // Delete a location
+    onDeleteSearch(inputId, placeId){
+        const items = this.state.numOfInput.filter(item => item !== inputId);
+        // const desCoords = this.state.destinationCoords.filter(coord => coord);
+        // const markersFiltered = this.state.markers.filter();
+        this.setState({
+            numOfInput: items,
+            // destinationCoords: desCoords,
+            // markers: markersFiltered
+>>>>>>> 7261981... Updating post interaction functionality
         });
     };
 
@@ -333,6 +347,14 @@ class MainMap extends React.Component{
         Keyboard.dismiss();
     };
 
+<<<<<<< HEAD
+=======
+    // TODO: Delete the polyline and marker at the same time with deleting the location
+    deletePlaceHandle(placeId){
+        this.props.onDeletePlace(placeId);
+    }
+
+>>>>>>> 7261981... Updating post interaction functionality
     // Dispatch a place
     addPlaceHandle(name, address){
         this.props.addingPlace(name, address);
@@ -412,6 +434,11 @@ class MainMap extends React.Component{
                                     destinationNameParam: this.state.destinationName,
                                     destinationAddressParam: this.state.destinationAddress
                                 });
+<<<<<<< HEAD
+=======
+                                // console.log('this.props.places after deleted', (HEIGHT-HEIGHT/3.5)-((HEIGHT-HEIGHT/3.5)-2*(HEIGHT/3.5)));
+                                
+>>>>>>> 7261981... Updating post interaction functionality
                             }}>
                                 <Text style={styles.next}>Style your trip!</Text>
                             </TouchableOpacity>
@@ -451,7 +478,7 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.fifth,
         borderRadius: 30,
         alignSelf: 'center',
-        marginTop: 450
+        marginTop: 2*(HEIGHT/3.5)-20
     },
     button:{
         justifyContent: 'center',
@@ -459,7 +486,7 @@ const styles = StyleSheet.create({
         flex: 1
     },
     next: {
-        fontSize: 15,
+        fontSize: 17,
         color: 'white',
         fontWeight: 'bold'
     }

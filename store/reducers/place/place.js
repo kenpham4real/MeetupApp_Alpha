@@ -1,4 +1,14 @@
+<<<<<<< HEAD
 import { ADD_PLACE, UNLOAD_PLACE } from '../../actions/place/place';
+=======
+// 'use strict'
+
+import { 
+    ADD_PLACE, 
+    UNLOAD_PLACE,
+    DELETE_PLACE,
+} from '../../actions/place/place';
+>>>>>>> 7261981... Updating post interaction functionality
 import { Place } from '../../../src/models/place'
 
 const initialState = {

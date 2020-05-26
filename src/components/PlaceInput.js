@@ -1,3 +1,5 @@
+'use strict'
+
 import React from 'react';
 import {
     View,
@@ -119,7 +121,8 @@ class PlaceInput extends React.Component{
 const styles = StyleSheet.create({
     buttonContainer:{
         flexDirection: 'row',
-        height: (HEIGHT - 705),
+        // height: (HEIGHT - 685),
+        height: (HEIGHT/3.5)/3.5,
         width: (WIDTH-70),
         marginTop: 20,
         padding: 5,

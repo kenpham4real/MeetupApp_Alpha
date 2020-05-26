@@ -1,3 +1,5 @@
+'use strict'
+
 export class Profile{
     constructor(name, avatar, email){
         this.name = name;

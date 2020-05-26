@@ -1,3 +1,5 @@
+'use strict'
+
 import React from 'react';
 import { Platform } from 'react-native';
 import { HeaderButton } from 'react-navigation-header-buttons';

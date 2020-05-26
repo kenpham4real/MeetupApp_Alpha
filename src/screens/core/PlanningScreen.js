@@ -1,3 +1,5 @@
+'use strict'
+
 // MeetUp 0
 
 import React from 'react';

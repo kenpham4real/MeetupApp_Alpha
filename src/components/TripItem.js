@@ -1,3 +1,5 @@
+'use strict'
+
 import React from 'react';
 import {
     View,
@@ -42,7 +44,7 @@ const TripItem = props => {
               <TouchableOpacity onPress={props.onEdit} style={styles.button}>
                 <Icon name='edit' size={23} color='grey' />
               </TouchableOpacity>
-              <TouchableOpacity style={styles.button}>
+              <TouchableOpacity onPress={props.onShare} style={styles.button}>
                 <Icon name='share' size={23} color='grey' />
               </TouchableOpacity>
             </Layout>
