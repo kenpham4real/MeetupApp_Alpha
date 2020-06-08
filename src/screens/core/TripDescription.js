@@ -1,10 +1,8 @@
-<<<<<<< HEAD
-import React, { useState } from 'react'
-=======
+
 'use strict'
 
 import React, { useState, useEffect, useCallback, useRef } from 'react'
->>>>>>> 7261981... Updating post interaction functionality
+
 import {
   View,
 
@@ -20,10 +18,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons'
 
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import  moment from 'moment'
-import { useDispatch } from 'react-redux';
-import { HeaderButtons, Item } from 'react-navigation-header-buttons';
-
-import HeaderButton from '../../components/UI/HeaderButton';
+import { useDispatch, useSelector } from 'react-redux';
 
 import Colors from '../../constants/Colors';
 import { 
@@ -49,10 +44,8 @@ const TripDescription = (props) => {
   const [chosenEndDate, setChosenEndDate] = useState('');
   const [chosenEndDate_unix, setChosenEndDate_unix] = useState(null);
   const [eventName, setEventName] = useState('');
-<<<<<<< HEAD
-=======
+
   const [chosenTrip, setChosenTrip] = useState([]);
->>>>>>> 7261981... Updating post interaction functionality
 
   const showMode = (currentMode) => {
     setDatePickerVisibility(true);
@@ -72,17 +65,6 @@ const TripDescription = (props) => {
     console.log('New confirm');
     hideDatePicker();
     if(chosenMode){
-<<<<<<< HEAD
-      setChosenStartDate(moment(day).format("MMMM Do YYYY, h:mm:ss a"))  
-    }else{
-      setChosenEndDate(moment(day).format("MMMM Do YYYY, h:mm:ss a"))
-    };
-  };
-
-  const onEventNameHandler = (name) => {
-    setEventName(name)
-  };
-=======
       setChosenStartDate(moment(day).format('MMMM Do YYYY, h:mm:ss a'));
       setChosenStartDate_unix(parseInt((new Date(moment(day).format()).getTime())/60000));
       console.log('chosenStartDate', chosenStartDate);
@@ -141,8 +123,7 @@ const TripDescription = (props) => {
         console.log('doEditTrip is false in useEffect');
       }
     });
->>>>>>> 7261981... Updating post interaction functionality
-
+  })
 
   return (
     <Layout style={styles.container}>
@@ -159,11 +140,8 @@ const TripDescription = (props) => {
             />
           </Layout>
           <Layout style={{alignItems: 'center', width: 50}}>
-<<<<<<< HEAD
-            <TouchableOpacity style={{flex: 1, justifyContent: 'center'}} onPress={()=> Keyboard.dismiss()}>
-=======
+
             <TouchableOpacity style={{flex: 1, justifyContent: 'center'}} onPress={()=> {Keyboard.dismiss(); console.log('chosenStartDate', chosenStartDate)}}>
->>>>>>> 7261981... Updating post interaction functionality
               <Icon name="done" size={36} color={Colors.third}/>
             </TouchableOpacity>
           </Layout>
@@ -206,12 +184,7 @@ const TripDescription = (props) => {
                   }
                 }>
                   <Text style={{fontFamily: 'Roboto-Regular', fontSize: 20}}>Finish</Text>  
-<<<<<<< HEAD
-                </TouchableOpacity>  
-            {/* </Layout> */}
-=======
                 </TouchableOpacity>
->>>>>>> 7261981... Updating post interaction functionality
 
             {isDatePickerVisible && (
               <DateTimePickerModal
@@ -333,29 +306,4 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.secondary
   },
 })
-<<<<<<< HEAD
 
-TripDescription.navigationOptions = (navData) => {
-  return{
-    headerTitle: 'About your trip',
-    headerRight: () => (
-    
-      <HeaderButtons HeaderButtonComponent={HeaderButton}>
-        <Item 
-          title="Finish"
-          iconName={Platform.OS === 'adroid' ? 'done-all' : 'done-all'}
-          onPress={() => {
-            navData.navigation.navigate('TripsListDetailScreen', {
-              final_eventName: eventName,
-              final_startDate: chosenStartDate,
-              final_endDate: chosenEndDate,
-              final_startLocAddress: startLocation
-            })
-          }}
-        />
-    </HeaderButtons>
-  )
-  }
-}
-=======
->>>>>>> 7261981... Updating post interaction functionality

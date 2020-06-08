@@ -1,14 +1,13 @@
 'use strict'
 
 import { Trip } from "../../../src/models/trip";
+import axios from 'axios';
 
 export const ADD_TRIP = 'ADD_TRIP';
 export const SET_TRIP = 'SET_TRIP';
-<<<<<<< HEAD
-=======
+
 export const UPDATE_TRIP = 'UPDATE_TRIP';
 export const SHARE_TRIP = 'SHARE_TRIP'
->>>>>>> 7261981... Updating post interaction functionality
 
 export const addTrip = (name, startDate, endDate, locations, locations_Image) => {
     return async (dispatch, getState) => {
@@ -52,19 +51,20 @@ export const fetchTrip = () => {
     return async (dispatch, getState) => {
         const token = getState().auth.user.token;
         const userId = getState().auth.user.uid;
+        console.log('userId', userId);
+
         try {
-            const response = await axios.get(
-                `https://meetupapp-21180.firebaseio.com/trips.json?auth=${token}`,{
+            const response = await fetch(
+                `https://meetupapp-21180.firebaseio.com/users/${userId}/trips.json?auth=${token}`,{
                     method: 'GET',
-                    
                 }
             )
-            
+        
             // if(!response.ok){
             //     throw new Error('Something went wrong, please try again!')
             // };
 
-            const resData = response.data;
+            const resData = await response.json();
             console.log(resData);
             const loadedTrips = [];
             console.log('Fetching...')
@@ -88,12 +88,9 @@ export const fetchTrip = () => {
 
         } catch (error) {
             console.log('Fetching has error (action)', error)
-            throw error;
         }
         
     }
-<<<<<<< HEAD
-=======
 }
 
 export const updateTrip = (placeId, name, startDate, endDate) => {
@@ -141,5 +138,5 @@ export const shareTrip = (uri) => {
         type: SHARE_TRIP,
         tripImgUri: uri
     }
->>>>>>> 7261981... Updating post interaction functionality
+
 }

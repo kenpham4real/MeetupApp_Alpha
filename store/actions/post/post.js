@@ -29,41 +29,48 @@ export const fetchPost = () => {
     return async (dispatch, getState) => {
         const token = getState().auth.user.token;
         const userId = getState().auth.user.uid;
-        let resData;
+        const postPath = 
+        firestore()
+        .collection('posts')
+        .doc('userId')
+        .collection(`${userId}`)
+        let postData;
         try {
             await 
-            firestore()
-            .collection('posts')
-            .doc('userId')
-            .collection(`${userId}`)
+            postPath
             .orderBy('createdAt', 'desc')
             .get()
-            .then(documentSnapshot => resData = documentSnapshot.docs)
+            .then(documentSnapshot => postData = documentSnapshot.docs);
 
             // if(!response.ok){
             //     throw new Error('Something went wrong, please try again!')
             // };
-            // console.log('resData for post', resData);
+            console.log('postData for post', postData);
             const loadedPosts = [];
             console.log('Fetching...');
-            for(let key in resData){
+
+            for(let key in postData){
+                const postComments = await postPath.doc(`${postData[key]._data.id}`).collection('commentInfo').doc(`${postData[key]._data.id}`).get()
+                console.log('postComments', postComments)
                 loadedPosts.push(new Post(
-                    resData[key]._data.id,
-                    resData[key]._data.uid,
-                    resData[key]._data.image,
-                    resData[key]._data.createdAt,
-                    resData[key]._data.description,
-                    resData[key]._data.location,
-                    resData[key]._data.likeInfo,
-                    resData[key]._data.commentInfo,
-                    resData[key]._data.shareInfo
+                    postData[key]._data.id,
+                    postData[key]._data.uid,
+                    postData[key]._data.image,
+                    postData[key]._data.createdAt,
+                    postData[key]._data.description,
+                    postData[key]._data.location,
+                    postData[key]._data.likeInfo,
+                    postComments._data,
+                    postData[key]._data.shareInfo
                 ))
             }
+
+            console.log('loadedPosts', loadedPosts)
 
             dispatch({
                 type: SET_POST,
                 postMade: loadedPosts,
-                posts: loadedPosts.filter(post => post.uid === userId)
+                posts: loadedPosts.filter(post => post.ownerId === userId)
             });
             console.log('\nFetch post finished');
 
@@ -76,8 +83,9 @@ export const fetchPost = () => {
 
 export const uploadPost = async (postImageUri, userId) => {
     const filePath = await getPathForImageFile(postImageUri)
-    console.log('filepath', filePath)
+    console.log('filepath', filePath);
     const filteredFilePathName = filterFilePath(filePath);
+    console.log('filteredFilePathName', filteredFilePathName);
     const storageRef = storage().ref('posts').child(`/${userId}/${filteredFilePathName}`)
     const metadata = {
         contentType: 'image/jpeg',
@@ -117,14 +125,15 @@ export const addPost = (postId, postImageUri, date, description, checkin_locatio
     return async (dispatch, getState) => {
         const userId = getState().auth.user.uid;
         const remoteUri = await uploadPost(postImageUri, userId);
-        
+        const postPath = 
+        firestore()
+        .collection('posts')
+        .doc('userId')
+        .collection(`${userId}`)
+        .doc(`${postId}`)
         try {
             await 
-            firestore()
-            .collection('posts')
-            .doc('userId')
-            .collection(`${userId}`)
-            .doc(`${postId}`)
+            postPath
             .set({
                 id: postId,
                 createdAt: date,
@@ -136,15 +145,22 @@ export const addPost = (postId, postImageUri, date, description, checkin_locatio
                     like_count: 0,
                     user_likes: null
                 },
-                commentInfo:{
-                    comment_count: 0,
-                    user_comments: null
-                },
                 shareInfo:{
                     share_count: 0,
                     user_shares: null
                 }
             })
+            await
+            postPath
+            .collection('commentInfo')
+            .doc(`${postId}`)
+            .set({
+                commentInfo:{
+                    comment_count: 0,
+                    user_comments: []
+                },
+            })
+            
             console.log('Finished adding post')
         } catch (error) {
             console.log('error', error)
@@ -165,7 +181,8 @@ export const addPost = (postId, postImageUri, date, description, checkin_locatio
 }
 // TODO: This works for choosing image from library, broken when taking an image to post --> Fix 
 export const getPathForImageFile = async (uri) => {
-    const stat = await RNFetchBlob.fs.stat(uri)
+    const stat = await RNFetchBlob.fs.stat(uri);
+    console.log('stat.path in getPathForImageFile', stat.path);
     return stat.path
 }
 
@@ -190,95 +207,8 @@ export const deletePost = (postId) => {
     }
 }
 
-export const updatePostInfo = (
-    postId, type_of_update, description, checkin_location, type_of_like, like_count, user_liker_uid, 
-    type_of_comment_action, comment_count, user_commenter_uid, comment, share_count, user_sharer_uid ) => {
+export const updatePostInfo = (postId, description, checkin_location) => {
         
-    return async (dispatch, getState) => {
-        const userId = getState().auth.user.uid;
-        const updatePath = 
-        firestore()
-        .collection('posts')
-        .doc('userId')
-        .collection(`${userId}`)
-        .doc(`${postId}`);
-        switch(type_of_update){
-            case BASIC_INFO:
-                try {
-                    await 
-                    updatePath
-                    .update({
-                        description: description,
-                        location: checkin_location
-                    })
-                } catch (error) {
-                    console.log('Error', error)
-                }
-                break;
-            case LIKE_UNLIKE:
-                try {
-                    await
-                    updatePath
-                    .update({
-                        'likeInfo.like_count': like_count,
-                        [`likeInfo.user_likes.${user_liker_uid}`]: 
-                            type_of_like == LIKE 
-                            ? user_liker_uid 
-                            : firestore.FieldValue.delete()
-                    })
-                } catch (error) {
-                    console.log('Error', error)
-                }
-                break;
-            case COMMENT_UNCOMMENT:
-                try {
-                    await
-                    updatePath
-                    .update({
-                        'commentInfo.comment_count': comment_count,
-                        [`commentInfo.user_comments.${user_commenter_uid}`]: 
-                            type_of_comment_action == COMMENT
-                            ? comment
-                            : firestore.FieldValue.delete()
-                    });
-                } catch (error) {
-                    console.log('Error', error)
-                }
-                break;
-            case SHARE_POST:
-                try {
-                    await
-                    updatePath
-                    .update({
-                        'shareInfo.share_count': share_count,
-                        [`shareInfo.user_shares.${user_sharer_uid}`]: user_sharer_uid
-                    })
-                } catch (error) {
-                    console.log('Error', error)
-                }
-                break;
-            default: break;
-        }
-        dispatch({
-            type: UPDATE_POST,
-            postId: postId,
-            type_of_update: type_of_update,
-            postData:{
-                description: description,
-                checkin_location: checkin_location,
-                like_count,
-                user_liker_uid,
-                comment_count,
-                user_commenter_uid,
-                comment,
-                share_count,
-                user_sharer_uid
-            }
-        })
-    }
-}
-
-export const like_unlike_post = (postId, type_of_like, like_count, user_liker_uid) => {
     return async (dispatch, getState) => {
         const userId = getState().auth.user.uid;
         try {
@@ -289,34 +219,133 @@ export const like_unlike_post = (postId, type_of_like, like_count, user_liker_ui
             .collection(`${userId}`)
             .doc(`${postId}`)
             .update({
-                'likeInfo.like_count': like_count,
-                [`likeInfo.user_likes.${user_liker_uid}`]: 
-                    type_of_like == LIKE 
-                    ? user_liker_uid 
-                    : firestore.FieldValue.delete()
+                description: description,
+                location: checkin_location
             })
         } catch (error) {
-            console.log('Error', error);
+            console.log('Error while updating basic info of post')
         }
+        
         dispatch({
-            type: LIKE_UNLIKE,
+            type: UPDATE_POST,
             postId: postId,
             postData:{
-                like_count,
-                user_liker_uid,
+                description: description,
+                checkin_location: checkin_location,
+                
             }
         })
     }
 }
 
-// export const comment_uncomment_post = (postId, type_of_comment_action, comment_count, user_commenter_uid, comment) => {
-//     return async (dispatch, getState) => {
-//         const userId = getState().auth.user.uid;
-//         try {
-//             await
+export const like_unlike_post = (postId, type_of_like, like_count, user_liker_uid, userPostLikeIndex, createdAt) => {
+    return async (dispatch, getState) => {
+        
+        const userId = getState().auth.user.uid;
+        let user_likes_after_filtered;
+        const postLikePath = 
+            firestore()
+            .collection('posts')
+            .doc('userId')
+            .collection(`${userId}`)
+            .doc(`${postId}`)
+        if(type_of_like == LIKE){
+            console.log('Addling like');
+            try {
+                await
+                postLikePath
+                .update({
+                    'likeInfo.like_count': like_count,
+                    [`likeInfo.user_likes`]: firestore.FieldValue.arrayUnion({[`${user_liker_uid}`]: createdAt})
+                })
+            } catch (error) {
+                console.log('Error', error);
+            }
+            user_likes_after_filtered = {
+                [user_liker_uid]: createdAt
+            }
+            console.log('user_likes_after_filtered', user_likes_after_filtered);
+        }else{
+            console.log('Removing like from: ', user_liker_uid);
+            const posts = getState().posts.posts;
+            console.log('state.posts', posts);
+            const postIndex = posts.findIndex(post => post.postId === postId);
+            const userLikeInfo = posts[postIndex].likeInfo.user_likes[userPostLikeIndex];
+            console.log('userLikeInfo to be removed', userLikeInfo);
+            user_likes_after_filtered = posts[postIndex].likeInfo.user_likes.filter(user => user !== userLikeInfo)
+            console.log('user_likes_after_filtered', user_likes_after_filtered);
+            try {
+                await
+                postLikePath
+                .update({
+                    'likeInfo.like_count': like_count,
+                    [`likeInfo.user_likes`]: firestore.FieldValue.arrayRemove(userLikeInfo)
+                })
+            } catch (error) {
+                console.log('Error', error);
+            }
+        }
+        dispatch({
+            type: LIKE_UNLIKE,
+            type_of_like: type_of_like,
+            postId: postId,
+            like_count,
+            user_likes: user_likes_after_filtered,
+        })
+    }
+}
 
-//         } catch (error) {
-//             console.log('Error', error);
-//         }
-//     }
-// }
+export const comment_uncomment_post = (postId, commentId, type_of_comment_action, comment_count, user_commenter_uid, edited_comment) => {
+    return async (dispatch, getState) => {
+        const userId = getState().auth.user.uid;
+        const postCommentPath = 
+            firestore()
+            .collection('posts')
+            .doc('userId')
+            .collection(`${userId}`)
+            .doc(`${postId}`)
+            .collection('commentInfo')
+            .doc(`${postId}`)
+        if(type_of_comment_action == COMMENT){
+            console.log('Adding comment');
+            try {
+                await
+                postCommentPath
+                .update({
+                    comment_count: comment_count,
+                    user_comments: firestore.FieldValue.arrayUnion({id: commentId, comment: edited_comment, uid: user_commenter_uid})
+                })
+                console.log('Finish adding comment')
+            } catch (error) {
+                console.log('Error', error);
+            }
+        }else{
+            console.log('Removing comment');
+            const posts = getState().posts;
+            console.log('state.posts', posts)
+            const userPostCommentIndex = posts.commentInfo.user_comments.findIndex(post => post.id == commentId);
+
+            try {
+                await
+                postCommentPath
+                .update({
+                    comment_count: comment_count,
+                    [`user_comments[${userPostCommentIndex}]`]: firestore.FieldValue.delete()
+                })
+            } catch (error) {
+                console.log('Error', error);
+            }
+        }
+        dispatch({
+            type: COMMENT_UNCOMMENT,
+            postId: postId,
+            commentInfo:{
+                commentId: commentId,
+                comment_count,
+                user_commenter_uid,
+                edited_comment,                
+            }
+        })
+    }
+}
+

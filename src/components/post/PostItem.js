@@ -1,6 +1,6 @@
 'use strict'
 
-import React, {useState} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
     View,
     Text, 
@@ -12,9 +12,11 @@ import {
     Modal,
     FlatList,
     TouchableWithoutFeedback,
-    Keyboard
+    Keyboard,
+    Button,
+    ScrollView
 } from 'react-native';
-import {useSelector} from 'react-redux';
+import {useSelector, useDispatch} from 'react-redux';
 import Colors from '../../constants/Colors';
 import CommentItem from '../../components/post/CommentItem'
 
@@ -28,16 +30,81 @@ const WIDTH = Dimensions.get('screen').width;
 const HEIGHT = Dimensions.get('screen').height;
 const HEADER_HEIGHT = WIDTH/7;
 const ITEM_HEIGHT = HEADER_HEIGHT+WIDTH;
+const COMMENT_INPUT_HEIGHT = 60
 
 const PostItem = props => {
 
     const [isOpenComment, setIsOpentComment] = useState(false);
-    const [isLike, setIsLike] = useState(false);
-    const [commentInput, setCommentInput] = useState('')
     const profile = useSelector(state => state.profile.userProfile );
     const profile_uid = useSelector(state => state.auth.user);
     const commentList = props.commentList;
-    
+
+    // TODO: Need to trigger like check to check whether the user has like the post or not
+    // useEffect(() => props._onCheckLike,[props.isLike])
+
+    const commentListView = () => {
+        return(
+            <View>
+                <Modal
+                    visible={isOpenComment}
+                    animated={true}
+                    animationType='slide'
+                    presentationStyle='pageSheet'
+                    propagateSwipe={true}
+                >
+                    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+                        <View style={{flex: 1}}>
+                            <View style={comment_modal_styles.header}>
+                                <TouchableOpacity style={{flex: 7, flexDirection: 'row', alignItems: 'center'}}>
+                                    <FontAwesome name='heart' size={20} color='red' style={{marginLeft: 10,}} />
+                                    <Text style={{marginLeft: 5, fontSize: 20}}>{props.like_count}</Text>
+                                    <Ionicons name='ios-arrow-forward' size={27} style={{marginLeft: 10,}} />
+                                </TouchableOpacity>
+                                <TouchableOpacity style={{flex: 1,justifyContent: 'center', alignItems: 'center'}} onPress={() => setIsOpentComment(false)}>
+                                    <MaterialIcons name='cancel' size={25} />
+                                </TouchableOpacity>
+                            </View> 
+                            <View style={{flex:1}}>
+                                <FlatList 
+                                    data={commentList}
+                                    keyExtractor={item => item.id}
+                                    renderItem={itemData => {
+                                        
+                                        return(
+                                            <CommentItem
+                                                userAvatar={profile.userAvatar}
+                                                commenterName="Test"
+                                                comment={itemData.item.comment}
+                                            />
+                                        )
+                                    }}
+                                />
+                            </View>
+                            <View style={{height: COMMENT_INPUT_HEIGHT}}/>
+                            <View style={comment_modal_styles.commentInputContainer}>
+                                <TouchableOpacity style={{marginLeft: 15}}>
+                                    <FontAwesome name='camera-retro' size={25} />
+                                </TouchableOpacity>
+                                <View style={comment_modal_styles.commentInput}>
+                                    <TextInput
+                                        placeholder='What are your thoughts?'
+                                        value={props.commentInput}
+                                        onChangeText={text => props._setCommentInput(text)}
+                                        multiline={true}
+                                        style={{flex: 1}}
+                                    />
+                                    <Ionicons name='md-paper-plane' size={23} onPress={props._onPostComment} 
+                                        style={{marginRight: 20}} 
+                                    />
+                                </View>
+                            </View>
+                        </View>
+                    </TouchableWithoutFeedback>
+                </Modal>
+            </View>
+        )
+    }
+
     return(
         <View style={styles.postContainer}>
             <View style={styles.postHeader}>
@@ -49,13 +116,13 @@ const PostItem = props => {
                 </View>
                 <TouchableOpacity 
                     style={styles.post_moreInfo} 
-                    // onPress={() => console.log('like_count', !itemData.item.likeInfo.like_count)}
+                    onPress={props._onDeletePost}
                 >
                     <Feather name='trash' size={23} />
                 </TouchableOpacity>
                 <TouchableOpacity 
                     style={styles.post_moreInfo} 
-                    onPress={props._postEditHandler}
+                    onPress={props._onPostEdit}
                 >
                     <Feather name='edit-2' size={23} />
                 </TouchableOpacity>
@@ -69,88 +136,37 @@ const PostItem = props => {
             <View style={styles.postInteractionContainer}>
                 <View style={styles.interactionIcons}>
                     <TouchableOpacity style={styles.post_moreInfo} onPress={() => {
-                        props._set_like_comment_share_handler();
-                        setIsLike(prev => !prev);
-                    }} >
-                        {/* {!likeCount.like_count && <EvilIcons name='heart' size={40} /> } */}
-                        <FontAwesome name='heart' size={27} style={{color: (isLike || props.like_count >= 1) ? 'red' : 'black', marginLeft: 5, marginRight: 8, marginTop: 2}} />
-                        
-                        
+                        console.log('Like this shit')
+                        props._onPostLike();
+                        props._setIsLike();
+                    }}>
+                        <FontAwesome name='heart' size={27} style={{color: (props.isLike) ? 'red' : 'black', marginLeft: 5, marginRight: 8, marginTop: 2}}/>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.post_moreInfo} onPress={() => setIsOpentComment(prev => !prev)} >
-                        <EvilIcons name='comment' size={40} />
+                    <TouchableOpacity style={styles.post_moreInfo} onPress={() => setIsOpentComment(prev => !prev)}>
+                        <EvilIcons name='comment' size={40}/>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.post_moreInfo} >
-                        <EvilIcons name='share-google' size={40} />
+                    <TouchableOpacity style={styles.post_moreInfo}>
+                        <EvilIcons name='share-google' size={40}/>
                     </TouchableOpacity>
                 </View>
+
                 <View style={styles.likeCounter}>
-                    {/* <Text style={{marginLeft: 10}}><Text style={{fontWeight: 'bold'}}>AlexDree</Text> and <Text style={{fontWeight: 'bold'}}>{itemData.item.likeInfo.like_count} others</Text> love this</Text> */}
-                    <Text style={{marginLeft: 10}}><Text style={{fontWeight: 'bold'}}>{props.like_count} people</Text> love this</Text>
+                    <Text style={{marginLeft: 10}}>
+                        <Text style={{fontWeight: 'bold'}}>{props.like_count} people </Text>love this
+                    </Text>
                 </View>
-                <View style={styles.postCaption}>
-                    {
-                    props.description &&
-                        <Text style={{marginLeft: 10}}>
-                            <Text style={styles.postOwnerName}>{props.userName} </Text>{props.description}
-                        </Text>
-                    }
-                </View>
+                {
+                    props.description 
+                    ? (<View style={styles.postCaption}>
+                            <Text style={{marginLeft: 10}}><Text style={styles.postOwnerName}>{props.userName} </Text>{props.description}</Text>
+                        
+                    </View>)
+                    : null
+                }
                 <TouchableOpacity style={styles.commentCounter} onPress={() => {setIsOpentComment(prev => !prev); console.log(profile)}}>
                     <Text style={{color: 'grey', marginLeft: 10}}>See all {props.comment_count} comments</Text>
                 </TouchableOpacity>
-
-                <Modal
-                    visible={isOpenComment}
-                    animated={true}
-                    animationType='slide'
-                    presentationStyle='pageSheet'
-                >
-                    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-                        <View style={{flex: 1}}>
-                            <View style={comment_modal_styles.header}>
-                                <TouchableOpacity style={{flex: 7, flexDirection: 'row', alignItems: 'center'}}>
-                                    <FontAwesome name='heart' size={20} color='red' style={{marginLeft: 10,}} />
-                                    <Text style={{marginLeft: 5, fontSize: 20}}>534</Text>
-                                    <Ionicons name='ios-arrow-forward' size={27} style={{marginLeft: 10,}} />
-                                </TouchableOpacity>
-                                <TouchableOpacity style={{flex: 1,justifyContent: 'center', alignItems: 'center'}} onPress={() => setIsOpentComment(false)}>
-                                    <MaterialIcons name='cancel' size={25} />
-                                </TouchableOpacity>
-                            </View> 
-                            <View>
-                                <FlatList 
-                                    data={[1,2,3,4,5,6,7,8,9,10]}
-                                    keyExtractor={item => item}
-                                    renderItem={itemData => {
-                                        return(
-                                            <CommentItem
-                                                userAvatar={profile.userAvatar}
-                                            />
-                                        )
-                                    }}
-                                />
-                            </View>
-                            <View style={comment_modal_styles.commentInputContainer}>
-                                <TouchableOpacity style={{marginLeft: 15}}>
-                                    <FontAwesome name='camera-retro' size={25} />
-                                </TouchableOpacity>
-                                <View style={comment_modal_styles.commentInput}>
-                                    <TextInput
-                                        placeholder='What are your thoughts?'
-                                        value={commentInput}
-                                        onChangeText={text => setCommentInput(text)}
-                                        multiline={true}
-                                        style={{flex: 1}}
-                                    />
-                                    <Ionicons name='md-paper-plane' size={23} onPress={() => props._sendCommentHandler()} 
-                                        style={{marginRight: 20}} 
-                                    />
-                                </View>
-                            </View>
-                        </View>
-                    </TouchableWithoutFeedback>
-                </Modal>
+                {commentListView()}
             </View>
         </View>
     )
@@ -272,7 +288,8 @@ const comment_modal_styles = StyleSheet.create({
         borderTopColor: Colors.commentBox,
         borderTopWidth: 1,
         flexDirection: 'row',
-        alignItems: 'center'
+        alignItems: 'center',
+        height: COMMENT_INPUT_HEIGHT
     },
     commentInput:{
         marginHorizontal: 10,

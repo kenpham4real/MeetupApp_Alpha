@@ -1,32 +1,13 @@
-<<<<<<< HEAD
-import React, { useState } from 'react';
-=======
+
 'use strict'
 
 import React, { useState, useCallback, useRef } from 'react';
->>>>>>> 7261981... Updating post interaction functionality
+
 import {
     FlatList,
     Text,
     StyleSheet,
     View,
-<<<<<<< HEAD
-    Image,
-    Animated,
-    ImageBackground
-} from 'react-native'
-import {
-    Layout,
-    Card,
-    Divider,
-    List
-} from '@ui-kitten/components';
-
-import { useSelector, useDispatch } from 'react-redux';
-import Icon from 'react-native-vector-icons/AntDesign';
-import IconDone from 'react-native-vector-icons/MaterialIcons'
-// import CollapsingToolbar from 'react-native-collapsingtoolbar';
-=======
     ImageBackground,
     TouchableOpacity,
     Dimensions,
@@ -40,83 +21,54 @@ import Icon from 'react-native-vector-icons/AntDesign';
 import IconDone from 'react-native-vector-icons/MaterialIcons'
 import ViewShot, {captureRef} from 'react-native-view-shot';
 import CameraRoll from '@react-native-community/cameraroll';
->>>>>>> 7261981... Updating post interaction functionality
 
 import PlaceItem from '../../components/PlaceItem';
-<<<<<<< HEAD
-import CarUI from '../../components/UI/Card';
-import {addTrip} from '../../../store/actions/trip/trip'
-import { TouchableOpacity } from 'react-native-gesture-handler';
-=======
 import {addTrip, updateTrip} from '../../../store/actions/trip/trip'
->>>>>>> 7261981... Updating post interaction functionality
 
-const HEADER_MAX_HEIGHT = 120;
-const HEADER_MIN_HEIGHT = 70;
-const PROFILE_IMAGE_MAX_HEIGHT = 80;
-const PROFILE_IMAGE_MIN_HEIGHT = 40;
+const WIDTH = Dimensions.get('screen').width;
 
 const TripsListDetailScreen = (props) => {
 
-<<<<<<< HEAD
-    const {final_eventName} = props.route.params;
-    const {final_startDate} = props.route.params;
-    const {final_endDate} = props.route.params;
+// tripId is passed from TripListScreen which belongs to the trip user wants to edit
+const {final_eventName, final_startDate, final_endDate, tripId, doEditTrip} = props.route.params;
+const [chosenPlaces, setChosenPlaces] = useState([]);
+const [imgShareUri, setImgShareUri] = useState('');
+const viewShot = useRef(null);
+const dispatch = useDispatch();
+// If user wants to edit their trip --> doEditTrip = true
+// Select places from available trips, else select from places passed from MainMap
+const places = doEditTrip ? useSelector(state => state.trips.availableTrips) : useSelector(state => state.places.places);
 
-    const dispatch = useDispatch();
-    const places = useSelector(state => state.places.places);
+useFocusEffect(useCallback(() => {
+    checkPlaces();
+},[tripId]))
 
-    // const places = arrayOf_desName.map((name, index) => ({
-    //     name: name,
-    //     address: arrayOf_desAddress[index],
-    //     id: index
-    //   }));
-
-    const onFinish = () => {
-        console.log('add trip');
-        dispatch(addTrip(final_eventName, final_startDate, final_endDate, places))
-=======
-    // tripId is passed from TripListScreen which belongs to the trip user wants to edit
-    const {final_eventName, final_startDate, final_endDate, tripId, doEditTrip} = props.route.params;
-    const [chosenPlaces, setChosenPlaces] = useState([]);
-    const [imgShareUri, setImgShareUri] = useState('');
-    const viewShot = useRef(null);
-    const dispatch = useDispatch();
-    // If user wants to edit their trip --> doEditTrip = true
-    // Select places from available trips, else select from places passed from MainMap
-    const places = doEditTrip ? useSelector(state => state.trips.availableTrips) : useSelector(state => state.places.places);
-
-    useFocusEffect(useCallback(() => {
-        checkPlaces();
-    },[tripId]))
-    
-    // Check if tripId is passed and doEditTrip == true
-    // If so map each locations to chosenPlaces
-    const checkPlaces= () => {
-        if(tripId && doEditTrip){
-            for(const key in places){
-                if(places[key].id === tripId){
-                    setChosenPlaces(places[key].locations)
-                }
+// Check if tripId is passed and doEditTrip == true
+// If so map each locations to chosenPlaces
+const checkPlaces= () => {
+    if(tripId && doEditTrip){
+        for(const key in places){
+            if(places[key].id === tripId){
+                setChosenPlaces(places[key].locations)
             }
-        }else{
-            return;
         }
+    }else{
+        return;
     }
+}
 
-    const onFinish = () => {
+const onFinish = () => {
 
-        doEditTrip 
-        ? dispatch(updateTrip(tripId, final_eventName, final_startDate, final_endDate))
-        : dispatch(addTrip(final_eventName, final_startDate, final_endDate, places, imgShareUri)) 
-        
->>>>>>> 7261981... Updating post interaction functionality
+    doEditTrip 
+    ? dispatch(updateTrip(tripId, final_eventName, final_startDate, final_endDate))
+    : dispatch(addTrip(final_eventName, final_startDate, final_endDate, places, imgShareUri)) 
+    
         props.navigation.navigate('TripsListScreen');
     }
 
     const onCapture = async () => {
         alert('Spot will automatically save this trip as a photo to your phone!')
-        // _requestCameraPermission().then(() => {
+        _requestCameraPermission().then(() => {
             captureRef(viewShot, {
                 format: "jpg",
                 quality: 0.8,
@@ -129,7 +81,7 @@ const TripsListDetailScreen = (props) => {
                     CameraRoll.saveToCameraRoll(uri);
                 },
             );
-        // }).catch(err => console.log(err))
+        }).catch(err => console.log(err))
     }
 
         // Check permission for android
@@ -223,32 +175,10 @@ const TripsListDetailScreen = (props) => {
                         }}
                     />
                 </View>
-<<<<<<< HEAD
-            </View>
 
-
-            <View style={{flex: 2}} >
-                <FlatList
-                    style={styles.list}
-                    data={places}
-                    keyExtractor={(item) => item.id}
-                    renderItem={(itemData) => {
-                        return(
-                            <PlaceItem
-                                name={itemData.item.name}
-                                address={itemData.item.address}
-                            />
-                        )
-                    }}
-                />
-
-            </View>
-            <View style={{height: 100}}/>
-        </ImageBackground>
-=======
             </ImageBackground>
         </ViewShot>
->>>>>>> 7261981... Updating post interaction functionality
+
     )
 }
 

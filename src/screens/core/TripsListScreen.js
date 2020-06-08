@@ -14,12 +14,10 @@ import {
     PermissionsAndroid,
     Image
 } from 'react-native';
-<<<<<<< HEAD
-=======
+
 import Share from 'react-native-share'
 import { useFocusEffect} from '@react-navigation/native';
 import CameraRoll from '@react-native-community/cameraroll';
->>>>>>> 7261981... Updating post interaction functionality
 
 import { useSelector, useDispatch } from 'react-redux';
 import {enableScreens} from 'react-native-screens';
@@ -44,11 +42,7 @@ const TripsListScreen = props => {
 
     const trips = useSelector(state => state.trips.availableTrips);
     const dispatch = useDispatch();
-<<<<<<< HEAD
 
-=======
-     
->>>>>>> 7261981... Updating post interaction functionality
     const loadTrips = useCallback(async() => {
         setError(null);
         setIsRefreshing(true);
@@ -61,15 +55,6 @@ const TripsListScreen = props => {
         setIsRefreshing(false);
     },[dispatch, setIsRefreshing, setError])
 
-<<<<<<< HEAD
-    useEffect(() => {
-        const willFocus = props.navigation.addListener(
-            'willFocus',
-            loadTrips
-        );
-        return () => {willFocus.remove();}
-    },[loadTrips]);
-=======
     // useEffect(() => {
     //     const unsubscribe = props.navigation.addListener('focus',() => loadTrips());
     //     return unsubscribe; 
@@ -78,7 +63,6 @@ const TripsListScreen = props => {
     useFocusEffect(useCallback (() => {
         loadTrips();
     },[dispatch,setIsRefreshing,setError]))
->>>>>>> 7261981... Updating post interaction functionality
 
     useEffect(() => {
         setIsLoading(true);
@@ -138,10 +122,7 @@ const TripsListScreen = props => {
                     renderItem={itemData => {
                         return(
                             <TripItem
-<<<<<<< HEAD
-                                onSelect={() => props.navigation.navigate('PlanningProcess', {screen: 'MainMapScreen', params: {doNotAddPlace: true}})}
-                                onEdit={() => props.navigation.navigate('PlanningProcess', {screen: 'TripDescription'})}
-=======
+
                                 onSelect={() => props.navigation.navigate('PlanningProcess', {
                                     screen: 'MainMapScreen', 
                                     params: {doNotAddPlace: true}
@@ -165,7 +146,6 @@ const TripsListScreen = props => {
                                 //     )
                                 //     : alert('This trip does not have an image to be share')
                                 // }}
->>>>>>> 7261981... Updating post interaction functionality
                                 eventName={itemData.item.name}
                                 startDate={itemData.item.startDate}
                                 endDate={itemData.item.endDate}

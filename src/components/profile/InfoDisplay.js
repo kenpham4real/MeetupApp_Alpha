@@ -8,12 +8,7 @@ import {
     Text,
     Animated
 } from 'react-native';
-import {
-    Layout,
-    Button,
-} from '@ui-kitten/components';
 import Colors from '../../constants/Colors';
-import Icon3 from 'react-native-vector-icons/AntDesign'
 
 const InfoDisplay = props => {
     return(
@@ -44,20 +39,6 @@ const InfoDisplay = props => {
                     </TouchableOpacity>
                 </View>
             </View>
-            {/* <View style={styles.followDisplay}>
-                <TouchableOpacity style={styles.followNum}>
-                    <Text style={{fontWeight: 'bold', fontSize: 18}}>100</Text>
-                    <Text style={{color: 'grey',fontSize: 17,}}> Following</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.followNum}>
-                    <Text style={{fontWeight: 'bold', fontSize: 18}}>1000</Text>
-                    <Text style={{color: 'grey',fontSize: 17}}> Followers</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.tripButton} onPress={props.navigateToTripsListScreen}>
-                    <Text style={{fontWeight: 'bold', fontSize: 18}}>{props.tripsNumber}</Text>
-                    <Text style={{ fontSize: 17, marginBottom: 5, color: 'grey'}}>Trips</Text>
-                </TouchableOpacity>
-            </View> */}
         </View>
     )
 }

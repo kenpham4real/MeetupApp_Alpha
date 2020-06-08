@@ -37,19 +37,7 @@ const POST_IMAGE_MARGIN_HORIZONTAL = 5;
 
 // TODO: 1. Image picker for background image
 // TODO: 2. Add image picker for profile image
-const imgData = [
-    {id: 1, postImage: '../../../assets/images/beach.jpg'},
-    {id: 2, postImage: '../../../assets/images/beach.jpg'},
-    {id: 3, postImage: '../../../assets/images/beach.jpg'},
-    {id: 4, postImage: '../../../assets/images/beach.jpg'},
-    {id: 5, postImage: '../../../assets/images/beach.jpg'},
-    {id: 6, postImage: '../../../assets/images/beach.jpg'},
-    {id: 7, postImage: '../../../assets/images/beach.jpg'},
-    {id: 8, postImage: '../../../assets/images/beach.jpg'},
-    {id: 9, postImage: '../../../assets/images/beach.jpg'},
 
-];
-const testArr = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];
 const ProfileScreen = (props) => {
     const [isLoading, setIsLoading] = useState(false);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -57,7 +45,6 @@ const ProfileScreen = (props) => {
 
     const [isFollowed, setIsFollowed] = useState(false);
     const [firstFollow, setFirstFollow] = useState(false);
-    const [isOpenPostViewModal, setIsOpenPostViewModal] = useState(false);
     const [postImageUri, setPostImageUri] = useState('');
     const [scrollIndex, setScrollIndex] = useState(0);
 
@@ -232,9 +219,7 @@ const ProfileScreen = (props) => {
                     isFollowed={isFollowed}
                     onFollow={onFollow}
                     userName={profile.userName}
-                    tripsNumber={trips.length}
                     pickImage={imagePickerHandler}
-                    navigateToTripsListScreen={() => props.navigation.navigate('TripsListScreen')}
                 />
 
                 <Animated.View style={[styles.followDisplay,{
@@ -249,8 +234,8 @@ const ProfileScreen = (props) => {
                         <Text style={{fontWeight: 'bold', fontSize: 18}}>1000</Text>
                         <Text style={{color: 'grey',fontSize: 17}}> Followers</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.tripButton} onPress={props.navigateToTripsListScreen}>
-                        <Text style={{fontWeight: 'bold', fontSize: 18}}>{props.tripsNumber}</Text>
+                    <TouchableOpacity style={styles.tripButton} onPress={() => props.navigation.navigate('TripsListScreen')}>
+                        <Text style={{fontWeight: 'bold', fontSize: 18}}>{trips.length}</Text>
                         <Text style={{ fontSize: 17, marginBottom: 5, color: 'grey'}}>Trips</Text>
                     </TouchableOpacity>
                     
@@ -322,9 +307,7 @@ const ProfileScreen = (props) => {
                             onPress={() => {
                                 setScrollIndex(itemData.index);
                                 // setIsOpenPostViewModal(true);
-                                props.navigation.navigate('PostView', {
-                                    posts: posts
-                                })
+                                props.navigation.navigate('PostView')
                         }} 
                             style={{
                                 marginHorizontal: findMidOfThree(posts, itemData.index) ? 0 : POST_IMAGE_MARGIN_HORIZONTAL ,
@@ -377,21 +360,6 @@ const ProfileScreen = (props) => {
                         />
                     </View>
             }
-
-            {/* <Modal
-                visible={isOpenPostViewModal}
-            >
-                    <View style={styles.modalHeader}>
-                        <Icon3 onPress={() => setIsOpenPostViewModal(false)} name='ios-arrow-round-back' size={40} style={{marginLeft: 10}}/>
-                    </View>
-                    <PostView
-                        posts={posts}
-                        postUserName={profile.userName}
-                        postOwnerAvatar={profile.userAvatar}
-                        postDescription={posts.description}
-                        scrollIndex={scrollIndex}
-                    />
-            </Modal> */}
             
         </View>
     );

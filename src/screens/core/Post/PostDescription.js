@@ -53,7 +53,7 @@ const PostDescription = (props) => {
 
     const _onSharingPost = () => {
         postEditId
-            ? dispatch(postActions.updatePostInfo(postEditId, postActions.BASIC_INFO, postDescription,checkInLocation))
+            ? dispatch(postActions.updatePostInfo(postEditId, postDescription,checkInLocation))
             : dispatch(postActions.addPost(uuid_v4(),postImageUri,new Date(),postDescription,checkInLocation));
         props.navigation.setParams({
             postEditId: null,

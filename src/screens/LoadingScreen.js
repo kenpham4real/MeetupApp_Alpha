@@ -8,13 +8,15 @@ import {
     Dimensions, 
     Text,
     StyleSheet,
-    ImageBackground
+    ImageBackground,
 } from 'react-native';
-import {
-    Layout
-} from '@ui-kitten/components';
+import AsyncStorage from '@react-native-community/async-storage';
+import {useSelector, useDispatch} from 'react-redux';
+import firebase from '@react-native-firebase/app'
 
 import { quotes } from '../../data/quotes';
+import * as authActions from '../../store/actions/auth/auth';
+import {addProfile} from '../../store/actions/profile/profile'
 
 const WIDTH = Dimensions.get('screen').width;
 const HEIGHT = Dimensions.get('screen').height;
@@ -23,11 +25,9 @@ const LoadingScreen = (props) => {
     
     const [logoPosition] = useState(new Animated.Value(0));
     const [textPosition] = useState(new Animated.Value(0));
-<<<<<<< HEAD
-=======
+
     const authState = useSelector(state => state.auth)
     const dispatch = useDispatch();
->>>>>>> 7261981... Updating post interaction functionality
 
     useEffect(() => {
         Animated.timing(logoPosition,{
@@ -36,15 +36,6 @@ const LoadingScreen = (props) => {
         }).start();
         Animated.timing(textPosition, {
             toValue: 1,
-<<<<<<< HEAD
-            duration: 4000
-        }).start();
-        setTimeout(() => {
-            props.navigation.navigate('AuthNavigator')
-        },7000);
-        
-    },[]);
-=======
             duration: 8000
         }).start(tryLogin);
         
@@ -77,7 +68,7 @@ const LoadingScreen = (props) => {
         await refreshToken();
         props.navigation.navigate('AppNavigator');
     };
->>>>>>> 7261981... Updating post interaction functionality
+
 
     return(
         <ImageBackground source={require('../../assets/images/sitting.jpg')} style={styles.container}>

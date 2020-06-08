@@ -20,7 +20,7 @@ import Icon from 'react-native-vector-icons/AntDesign';
 import PlaceInput from '../../components/PlaceInput';
 import Colors from '../../constants/Colors'
 import {GOOGLE_API_KEY} from '../../constants/keys/APIs/Google';
-import { addPlace, unLoadPlace } from '../../../store/actions/place/place';
+import { addPlace, unLoadPlace, deletePlace } from '../../../store/actions/place/place';
 
 import axios from 'axios';
 import PolyLine from '@mapbox/polyline';
@@ -44,7 +44,8 @@ const initialState = {
     initial_UserLongitude: 0,
     userLocationAddress: '',
 
-    destination: [],
+    destinationId:[],
+    destination: '',
     destinationName: [],
     destinationAddress: [],
     destinationCoords: [],
@@ -60,7 +61,8 @@ const initialState = {
 const cleanUpState = {
     hasMapPermission: false,
 
-    destination: [],
+    destinationId:[],
+    destination: '',
     destinationName: [],
     destinationAddress: [],
     destinationCoords: [],
@@ -192,6 +194,7 @@ class MainMap extends React.Component{
                 longitude: point[1],
             }));
             this.setState({
+                destinationId: [...this.state.destinationId,placeId],
                 destination: placeId,
                 destinationCoords: [...this.state.destinationCoords, latLng],
                 markers: [...markers, latLng],
@@ -222,6 +225,7 @@ class MainMap extends React.Component{
             );
 
             let locationDecoded = result.data.result;
+            console.log('result', result);
             this.setState({
                 userLatitude: locationDecoded.geometry.location.lat,
                 userLongitude: locationDecoded.geometry.location.lng,
@@ -235,7 +239,7 @@ class MainMap extends React.Component{
             destinationNameInstance = locationDecoded.name;
             destinationAddressInstance = locationDecoded.formatted_address;
             
-            this.addPlaceHandle(destinationNameInstance, destinationAddressInstance);
+            this.addPlaceHandle(destination,destinationNameInstance, destinationAddressInstance);
 
         }catch(err) {
             console.log(err);
@@ -252,11 +256,12 @@ class MainMap extends React.Component{
             );
 
             let locationDecoded = result.data.results[0].formatted_address;
-
+            let locationDecoded_Id = result.data.results[0].place_id;
             this.setState({
+                destinationId: [...this.state.destinationId, locationDecoded_Id],
                 userLocationAddress: locationDecoded
             })
-            this.addPlaceHandle(this.state._userLocationDisplayed, this.state.userLocationAddress);
+            this.addPlaceHandle(locationDecoded_Id,this.state._userLocationDisplayed, this.state.userLocationAddress);
             console.log('user location is dispatched', this.state.userLocationAddress)
         }catch(err) {
             console.log(err);
@@ -303,61 +308,44 @@ class MainMap extends React.Component{
     // Adding a search bar
     onAddSearch(){
         this.setState((state) => ({
-            counter: state.counter + INCREMENT,
-            numOfInput: [...state.numOfInput, state.counter],
+            counter: ++state.counter,
         }));
+        this.setState((state) => ({
+            numOfInput: [...state.numOfInput, state.counter],
+        }))
         this.getPlaceDetails();
     };
 
-<<<<<<< HEAD
-    // Delete a search bar
-    onDeleteSearch(inputId){
-        // const items = this.state.numOfInput.filter(item => item !== inputId);
-        const desName_Output = this.onDeleteLocation(this.state.destinationName, inputId);
-        const desAddress_Output = this.onDeleteLocation(this.state.destinationAddress, inputId);
-        const numOfInput_Output = this.onDeleteLocation(this.state.numOfInput, inputId);
-
-        this.setState({
-            numOfInput: numOfInput_Output,
-            destinationName: desName_Output,
-            destinationAddress: desAddress_Output
-=======
     // Delete a location
-    onDeleteSearch(inputId, placeId){
-        const items = this.state.numOfInput.filter(item => item !== inputId);
-        // const desCoords = this.state.destinationCoords.filter(coord => coord);
-        // const markersFiltered = this.state.markers.filter();
+    onDeleteSearch(inputIndex){
+        const items = this.state.numOfInput.filter(item => item !== inputIndex);
+        const destinationCoords_filtered = this.state.destinationCoords.filter(coord => coord);
+        const markers_filtered = this.state.markers.filter();
         this.setState({
             numOfInput: items,
             // destinationCoords: desCoords,
             // markers: markersFiltered
->>>>>>> 7261981... Updating post interaction functionality
         });
+        const destinationToBeDeleted = this.state.destinationId[inputIndex];
+        this.setState({
+            destinationId: this.state.destinationId.filter(des => des !== destinationToBeDeleted)
+        })
+        destinationToBeDeleted ? this.deletePlaceHandle(destinationToBeDeleted) : null;
     };
-
-    // TODO: Fix this since it hasn't worked
-    // Delete the destination name and address at the same tim with deleting the search bar (if it was searched)
-    onDeleteLocation(locInput, inputId){
-        const elements = locInput.filter(el => el !== inputId);
-        return elements;
-    }
 
     // Hide keyboard when tapping outside the keyboard
     hideKeyboard(){
         Keyboard.dismiss();
     };
 
-<<<<<<< HEAD
-=======
     // TODO: Delete the polyline and marker at the same time with deleting the location
     deletePlaceHandle(placeId){
         this.props.onDeletePlace(placeId);
     }
 
->>>>>>> 7261981... Updating post interaction functionality
     // Dispatch a place
-    addPlaceHandle(name, address){
-        this.props.addingPlace(name, address);
+    addPlaceHandle(placeId,name, address){
+        this.props.addingPlace(placeId,name, address);
     }
 
     render(){
@@ -407,14 +395,15 @@ class MainMap extends React.Component{
                             
                             <FlatList
                                 data={this.state.numOfInput}
+                                // extraData={this.state.destination}
                                 keyExtractor={(item, index) => item}
-                                renderItem={({itemData,index}) => {
+                                renderItem={(itemData) => {
                                     return(
                                         <PlaceInput
                                             id={itemData}
                                             defaultValue={this.state._userLocationDisplayed}
-                                            displayDefaultValue={!index}
-                                            onDelete={this.onDeleteSearch}
+                                            displayDefaultValue={!itemData.index}
+                                            onDelete={() => this.onDeleteSearch(itemData.index)}
                                             showDirectionOnMap={this.showDirectionOnMap}
                                             userLatitude={userLatitude}
                                             userLongitude={userLongitude}
@@ -434,11 +423,12 @@ class MainMap extends React.Component{
                                     destinationNameParam: this.state.destinationName,
                                     destinationAddressParam: this.state.destinationAddress
                                 });
-<<<<<<< HEAD
-=======
-                                // console.log('this.props.places after deleted', (HEIGHT-HEIGHT/3.5)-((HEIGHT-HEIGHT/3.5)-2*(HEIGHT/3.5)));
-                                
->>>>>>> 7261981... Updating post interaction functionality
+                                // console.log('this.props.places after deleted', this.props.places);
+                                // console.log('this.state.destination', this.state.destination);
+                                // console.log('this.state.destinationId', this.state.destinationId);
+                                // console.log('this.state.numOfInput', this.state.numOfInput);
+                                // console.log('this.state.markers', this.state.markers);
+                                // console.log('this.state.destinationCoords', this.state.destinationCoords);
                             }}>
                                 <Text style={styles.next}>Style your trip!</Text>
                             </TouchableOpacity>
@@ -492,15 +482,16 @@ const styles = StyleSheet.create({
     }
 });
 
-// const mapStateToProps = state => {
-//     return{
-//         places: state.places.places
-//     };
-// };
+const mapStateToProps = state => {
+    return{
+        places: state.places.places
+    };
+};
 
 const mapDispatchToProps = (dispatch) => ({
-    addingPlace: (_name, _address) => dispatch(addPlace(_name, _address)),
-    onPlacesUnload: () => dispatch(unLoadPlace())
+    addingPlace: (_placeId,_name, _address) => dispatch(addPlace(_placeId,_name, _address)),
+    onPlacesUnload: () => dispatch(unLoadPlace()),
+    onDeletePlace: (_placeId) => dispatch(deletePlace(_placeId))
 })
 
-export default connect(null, mapDispatchToProps)(MainMap)
+export default connect(mapStateToProps, mapDispatchToProps)(MainMap)

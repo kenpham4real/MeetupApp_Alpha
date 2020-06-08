@@ -1,6 +1,6 @@
 'use strict'
 
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
     View,
     TextInput,
@@ -11,10 +11,7 @@ import {
     Dimensions,
     Text
 } from 'react-native';
-import firestore from '@react-native-firebase/firestore'
-import Icon from 'react-native-vector-icons/Feather';
-import InteractionIcon from 'react-native-vector-icons/EvilIcons';
-import HeartIcon from 'react-native-vector-icons/FontAwesome';
+import {v4 as uuid_v4} from 'uuid';
 import Icon3 from 'react-native-vector-icons/Ionicons';
 import { useSelector, useDispatch } from 'react-redux';
 
@@ -30,74 +27,35 @@ const ITEM_HEIGHT = HEADER_HEIGHT+WIDTH;
 const PostView = props => {
     
     // const {posts} = props.route.params;
-    const posts = useSelector(state => state.posts.availablePosts)
+    const [commentInput, setCommentInput] = useState('')
+    const [isLike, setIsLike] = useState(null)
+    const posts = useSelector(state => state.posts.availablePosts);
+    const profile = useSelector(state => state.profile.userProfile );
+    const profile_uid = useSelector(state => state.auth.user);
+
+    // const [isLike, setIsLike] = useState(false);
     const scrollIndex = props.scrollIndex;
-    const [comment, setComment] = useState('');
     const dispatch = useDispatch();
 
-    const profile = useSelector(state => state.profile.userProfile );
-    const profile_uid = useSelector(state => state.auth.user)
+    const _onPostLike = (post, like_count, user_liker_uid) => {
+        // Check if user_liker_uid had liked the post
+        // YES => remove the user_liker_uid off the like list
+        // NO => add the user_liker_uid to the like list
+        const userLikes = post.likeInfo.user_likes;
+        const user_liker_uid_index = userLikes.findIndex(user => Object.keys(user) == user_liker_uid);
+        user_liker_uid_index !== -1
+            ? dispatch(postActions.like_unlike_post(post.postId, postActions.UNLIKE, like_count-1,user_liker_uid,user_liker_uid_index, new Date()))
+            : dispatch(postActions.like_unlike_post(post.postId, postActions.LIKE, like_count+1, user_liker_uid,user_liker_uid_index, new Date()))
 
-    const _set_like_comment_share_handler = (item, type_of_interaction, sub_type_of_interaction) => {
-        // setIsLike(prev => !prev); 
-        // item.isLike = isLike;
-        switch(type_of_interaction){
-            case postActions.LIKE_UNLIKE:
-                dispatch(postActions.updatePostInfo(
-                    item.postId,
-                    type_of_interaction,
-                    item.description, 
-                    item.checkin_location, 
-                    sub_type_of_interaction === postActions.LIKE ? postActions.LIKE : postActions.UNLIKE, 
-                    sub_type_of_interaction === postActions.LIKE ? item.likeInfo.like_count+1 : item.likeInfo.like_count-1,
-                    profile_uid.uid,
-                    null,
-                    item.commentInfo.comment_count,
-                    null,
-                    item.commentInfo.comment,
-                    item.shareInfo.share_count,
-                    null
-                ));
-                break;
-            case postActions.COMMENT_UNCOMMENT:
-                dispatch(postActions.updatePostInfo(
-                    item.postId,
-                    type_of_interaction,
-                    item.description, 
-                    item.checkin_location, 
-                    null, 
-                    item.likeInfo.like_count,
-                    null,
-                    sub_type_of_interaction === postActions.COMMENT ? postActions.COMMENT : postActions.UNCOMMENT,
-                    sub_type_of_interaction === postActions.COMMENT ? item.commentInfo.comment_count+1 : item.commentInfo.comment_count-1,
-                    profile_uid.uid,
-                    sub_type_of_interaction === postActions.COMMENT ? comment : null,
-                    item.shareInfo.share_count,
-                    null
-                ));
-                break;
-            default: 
-                dispatch(postActions.updatePostInfo(
-                    item.postId,
-                    postActions.SHARE_POST,
-                    item.description, 
-                    item.checkin_location, 
-                    null, 
-                    item.likeInfo.like_count,
-                    null,
-                    null,
-                    item.commentInfo.comment_count,
-                    null,
-                    item.commentInfo.comment,
-                    item.shareInfo.share_count+1,
-                    profile_uid.uid
-                ));
-                break;
-        }
-        
     }
 
-    const _postEditHandler = (postEditId, postEditImage) => {
+    const _onPostComment = (postId, comment_count, user_commenter_uid, comment) => {
+        dispatch(postActions.comment_uncomment_post(postId,uuid_v4(),postActions.COMMENT,comment_count+1,user_commenter_uid,comment))
+    }
+
+
+
+    const _onPostEdit = (postEditId, postEditImage) => {
         console.log('postEditId', postEditId)
         props.navigation.navigate('PostDescriptionStack', {
             postEditId: postEditId,
@@ -105,9 +63,16 @@ const PostView = props => {
         })
     }
 
-    // const _openCommentHandler = () => {
-    //     setIsOpentComment(prev => !prev);
-    // }
+    const _onDeletePost = (postId) => {
+        dispatch(postActions.deletePost(postId))
+    }
+
+    const _onCheckLike = (postId, userId) => {
+        const postToCheckIndex = posts.findIndex(post => post.postId === postId);
+        const userLikeIndex = posts[postToCheckIndex].likeInfo.user_likes.findIndex(user => Object.keys(user) === userId);
+        userLikeIndex !== -1 ? setIsLike(false) : setIsLike(true)
+
+    }
     
     return(
         <View style={styles.container}>
@@ -115,32 +80,37 @@ const PostView = props => {
                 <Icon3 onPress={() => {props.navigation.goBack(); console.log(posts)}} name='ios-arrow-round-back' size={40} style={{marginLeft: 10}}/>
             </View>
             <FlatList
-                showsVerticalScrollIndicator={false}
-                getItemLayout={(data, index) => ({
-                    length: ITEM_HEIGHT, 
-                    offset: ITEM_HEIGHT * index, 
-                    index,
-                })}
-                initialScrollIndex={scrollIndex}
+                // showsVerticalScrollIndicator={false}
+                // getItemLayout={(data, index) => ({
+                //     length: ITEM_HEIGHT, 
+                //     offset: ITEM_HEIGHT * index, 
+                //     index,
+                // })}
+                // initialScrollIndex={scrollIndex}
                 data={posts}
                 keyExtractor={(item) => item.postId}
                 renderItem={itemData => {
-                    let likeCount = itemData.item.likeInfo
+                    const postItem = itemData.item;
                     return(
                         <PostItem
                             userName={profile.userName}
                             userAvatar={profile.userAvatar}
-                            postImage={itemData.item.postImage}
-                            description={itemData.item.description}
-                            comment_count={itemData.item.commentInfo.comment_count}
-                            like_count={itemData.item.likeInfo.like_count}
-                            comment={comment}
-                            commentList={itemData.item.commentInfo.user_comments}
-                            _sendCommentHandler={() => _set_like_comment_share_handler(itemData.item, postActions.COMMENT_UNCOMMENT, postActions.COMMENT)}
-                            // user_commenter_avatar={firestore().collection('users').doc(`${itemData.item.commentInfo.user_comments[`${profile_uid.uid}`]}`)}
-                            _commentHandler={(text) => setComment(text)}
-                            _postEditHandler={() => _postEditHandler(itemData.item.postId, itemData.item.postImage)}
-                            _set_like_comment_share_handler={() => _set_like_comment_share_handler(itemData.item, postActions.LIKE_UNLIKE, postActions.LIKE)}
+                            postImage={postItem.postImage}
+                            description={postItem.description}
+                            like_count={postItem.likeInfo.like_count}
+                            postId={postItem.postId}
+                            userId={profile_uid.uid}
+                            isLike={isLike}
+                            _onCheckLike={() => _onCheckLike(postItem.postId, profile.uid)}
+                            _setIsLike={() => setIsLike(prev => !prev)}
+                            comment_count={postItem.commentInfo.comment_count}
+                            commentList={postItem.commentInfo.user_comments}
+                            commentInput={commentInput}
+                            _setCommentInput={setCommentInput}
+                            _onPostLike={() => _onPostLike(postItem,postItem.likeInfo.like_count, profile_uid.uid)}
+                            _onPostComment={() => _onPostComment(postItem.postId,postItem.commentInfo.comment_count, profile_uid.uid,commentInput)}
+                            _onPostEdit={() => _onPostEdit(postItem.postId,postItem.image)}
+                            _onDeletePost={() => _onDeletePost(postItem.postId)}
                         />
                     )
                 }}

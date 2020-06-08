@@ -21,9 +21,9 @@ const CommentItem = (props) => {
             <View style={comment_modal_styles.commenterContainer}>
                 <View style={comment_modal_styles.commentContent}>
                     <TouchableOpacity style={comment_modal_styles.commenterName}>
-                        <Text style={{fontSize: 16, fontWeight: 'bold'}}>Mogzzer</Text>
+                        <Text style={{fontSize: 16, fontWeight: 'bold'}}>{props.commenterName}</Text>
                     </TouchableOpacity>
-                    <Text style={{fontSize: 17}}>This is so interesting!</Text>
+                    <Text style={{fontSize: 17}}>{props.comment}</Text>
                 </View>
                 <View style={comment_modal_styles.commentInteraction}>
                     <TouchableOpacity style={comment_modal_styles.interactionInfo}>
