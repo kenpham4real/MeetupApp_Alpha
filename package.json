@@ -30,7 +30,7 @@
     "lodash": "^4.17.15",
     "moment": "^2.25.3",
     "react": "16.9.0",
-    "react-native": "0.61.5",
+    "react-native": "0.62.3",
     "react-native-collapsingtoolbar": "^1.0.3",
     "react-native-device-info": "^5.5.7",
     "react-native-fbsdk": "^1.1.2",
