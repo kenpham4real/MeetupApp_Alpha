@@ -28,7 +28,7 @@
     "@ui-kitten/components": "^4.4.1",
     "axios": "^0.19.2",
     "lodash": "^4.17.15",
-    "moment": "^2.25.3",
+    "moment": "^2.29.2",
     "react": "16.9.0",
     "react-native": "0.61.5",
     "react-native-collapsingtoolbar": "^1.0.3",
